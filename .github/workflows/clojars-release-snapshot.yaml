@@ -1,0 +1,51 @@
+name: Release Snapshot Version
+
+on:
+  workflow_call:
+    secrets:
+      GPG_SIGNING_KEY:
+        required: true
+        description: 'GPG signing key for signing artifacts.'
+      CLOJARS_USER:
+        required: true
+        description: 'Clojars username for deployment.'
+      CLOJARS_PASS:
+        required: true
+        description: 'Clojars password/token for deployment.'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed for actions/checkout
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare java
+        uses: actions/setup-java@v4
+        with:
+          distribution: adopt
+          # Using a hardcoded version for now, could be an input if needed
+          java-version: 21
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@13.2
+        with:
+          lein: latest
+
+      - name: project test
+        run: lein test
+
+      - name: Configure GPG key
+        env:
+          # Access secrets passed from the calling workflow
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+        run: echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --import >/dev/null 2>/dev/null
+
+      - name: Deploy to clojars
+        env:
+          # Access secrets passed from the calling workflow
+          CLOJARS_USER: ${{ secrets.CLOJARS_USER }}
+          CLOJARS_PASS: ${{ secrets.CLOJARS_PASS }}
+        run: lein deploy clojars
