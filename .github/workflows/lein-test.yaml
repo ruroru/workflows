@@ -1,0 +1,33 @@
+name: Leiningen test
+
+on:
+  workflow_call:
+    # You can define inputs or secrets here if needed by the reusable workflow
+    # inputs:
+    #   java-version:
+    #     required: false
+    #     type: string
+    #     default: '21'
+
+jobs:
+  test-jvm:
+    runs-on: ubuntu-latest # Keep a single OS in the reusable workflow for simplicity
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare java
+        uses: actions/setup-java@v4
+        with:
+          distribution: adopt
+          # Use a default or an input for java-version if you made it configurable
+          java-version: 21
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@13.2
+        with:
+          lein: latest
+
+      - name: Run project unit tests
+        run: lein test
