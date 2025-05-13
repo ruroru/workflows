@@ -2,12 +2,6 @@ name: Leiningen test
 
 on:
   workflow_call:
-    # You can define inputs or secrets here if needed by the reusable workflow
-    # inputs:
-    #   java-version:
-    #     required: false
-    #     type: string
-    #     default: '21'
 
 jobs:
   test-jvm:
@@ -28,6 +22,9 @@ jobs:
         uses: DeLaGuardo/setup-clojure@13.2
         with:
           lein: latest
+
+      - name: Check reflection warnings
+        run: lein strict-check
 
       - name: Run project unit tests
         run: lein test

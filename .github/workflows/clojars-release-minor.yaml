@@ -5,10 +5,13 @@ on:
     secrets:
       GPG_SIGNING_KEY:
         required: true
+        description: 'GPG signing key for signing artifacts.'
       CLOJARS_USER:
         required: true
+        description: 'Clojars username for deployment.'
       CLOJARS_PASS:
         required: true
+        description: 'Clojars password/token for deployment.'
 
 jobs:
   deploy:
