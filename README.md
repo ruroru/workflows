@@ -3,7 +3,6 @@
 Add these plugins to your plugin list
 
 ```clojure
-[org.clojars.jj/strict-check "1.0.2"]
 [org.clojars.jj/bump "1.0.4"]
 ```
 
@@ -65,8 +64,8 @@ jobs:
       CLOJARS_PASS: ${{ secrets.CLOJARS_PASS }}
 ```
 
-## Options
-| Option      | Default value | plugin need?           |
-| ----------- | ------------- | ---------------------- |
-| bump_readme | true          | org.clojars.jj/bump-md |
-
+## Inputs
+| Input        | Default value | plugin needed                                                   |
+| ------------ | ------------- | --------------------------------------------------------------- |
+| bump_readme  | true          | [bump-md](https://clojars.org/org.clojars.jj/bump-md)           |
+| strict_check | true          | [strict-check](https://clojars.org/org.clojars.jj/strict-check) |

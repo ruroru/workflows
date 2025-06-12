@@ -2,10 +2,16 @@ name: Leiningen test
 
 on:
   workflow_call:
+    inputs:
+      strict_check:
+        required: false
+        type: boolean
+        default: true
+        description: 'Check for reflection warnings.'
 
 jobs:
   test-jvm:
-    runs-on: ubuntu-latest # Keep a single OS in the reusable workflow for simplicity
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -15,7 +21,6 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: adopt
-          # Use a default or an input for java-version if you made it configurable
           java-version: 21
 
       - name: Install clojure tools
@@ -24,7 +29,11 @@ jobs:
           lein: latest
 
       - name: Check reflection warnings
+        if: ${{ inputs.strict_check == true }}
         run: lein strict-check
+      - name: Check reflection warnings
+        if: ${{ inputs.strict_check == false }}
+        run: echo "Skipping strict-check"
 
       - name: Run project unit tests
         run: lein test
