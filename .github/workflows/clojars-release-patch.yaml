@@ -2,6 +2,12 @@ name: Release Patch Version
 
 on:
   workflow_call:
+    inputs:
+      bump_readme:
+        required: false
+        type: boolean
+        default: true
+        description: 'Set to false to skip stepping the version in README.md.'
     secrets:
       GPG_SIGNING_KEY:
         required: true
@@ -38,6 +44,9 @@ jobs:
         run: echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --import >/dev/null 2>/dev/null
       - name: Step patch version for release
         run: lein bump patch
+      - name: Step version in README.md
+        if: ${{ inputs.bump_readme == true }}
+        run: lein bump-md
       - name: push
         uses: stefanzweifel/git-auto-commit-action@v6
         with:

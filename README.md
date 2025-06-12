@@ -65,3 +65,8 @@ jobs:
       CLOJARS_PASS: ${{ secrets.CLOJARS_PASS }}
 ```
 
+## Options
+| Option      | Default value | plugin need?           |
+| ----------- | ------------- | ---------------------- |
+| bump_readme | true          | org.clojars.jj/bump-md |
+
