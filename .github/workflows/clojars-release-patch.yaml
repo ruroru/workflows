@@ -8,6 +8,12 @@ on:
         type: boolean
         default: true
         description: 'Set to false to skip stepping the version in README.md.'
+      lein_compile_profile:
+        required: false
+        type: string
+        default: ''
+        description: 'Optional Leiningen profile to use (e.g., "dev", "prod", "test").'
+
     secrets:
       GPG_SIGNING_KEY:
         required: true
@@ -36,8 +42,18 @@ jobs:
         uses: DeLaGuardo/setup-clojure@13.4
         with:
           lein: latest
-      - name: Run tests
+
+      - name: compile project
+        run: |
+          if [ -z "${{ inputs.lein_compile_profile }}" ]; then
+            lein compile
+          else
+            lein with-profile ${{ inputs.lein_compile_profile }} compile
+          fi
+
+      - name: test projects
         run: lein test
+
       - name: Configure GPG key
         env:
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}

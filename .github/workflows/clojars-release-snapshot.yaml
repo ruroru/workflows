@@ -2,6 +2,13 @@ name: Release Snapshot Version
 
 on:
   workflow_call:
+    inputs:
+      lein_compile_profile:
+        required: false
+        type: string
+        default: ''
+        description: 'Optional Leiningen profile to use (e.g., "dev", "prod", "test").'
+
     secrets:
       GPG_SIGNING_KEY:
         required: true
@@ -17,7 +24,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needed for actions/checkout
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,7 +33,6 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: adopt
-          # Using a hardcoded version for now, could be an input if needed
           java-version: 21
 
       - name: Install clojure tools
@@ -34,18 +40,24 @@ jobs:
         with:
           lein: latest
 
-      - name: project test
+      - name: compile project
+        run: |
+          if [ -z "${{ inputs.lein_compile_profile }}" ]; then
+            lein compile
+          else
+            lein with-profile ${{ inputs.lein_compile_profile }} compile
+          fi
+
+      - name: test project
         run: lein test
 
       - name: Configure GPG key
         env:
-          # Access secrets passed from the calling workflow
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
         run: echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --import >/dev/null 2>/dev/null
 
       - name: Deploy to clojars
         env:
-          # Access secrets passed from the calling workflow
           CLOJARS_USER: ${{ secrets.CLOJARS_USER }}
           CLOJARS_PASS: ${{ secrets.CLOJARS_PASS }}
         run: lein deploy clojars
