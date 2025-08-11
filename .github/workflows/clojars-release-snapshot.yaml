@@ -20,7 +20,7 @@ jobs:
       contents: write # Needed for actions/checkout
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Prepare java
         uses: actions/setup-java@v4
