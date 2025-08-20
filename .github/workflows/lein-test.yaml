@@ -35,9 +35,10 @@ jobs:
           lein: latest
       - name: Echo Profile
         run: echo "${{ inputs.lein_profile }}"
-      - name: Check reflection warnings
+      - name: Check reflection 
+        if: ${{ inputs.strict_check == true }}
         run: lein strict-check
-      - name: Check reflection warnings
+      - name: Skipping relection check
         if: ${{ inputs.strict_check == false }}
         run: echo "Skipping strict-check"
       - name: compile project
