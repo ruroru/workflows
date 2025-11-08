@@ -13,11 +13,16 @@ on:
         type: string
         default: ''
         description: 'Optional Leiningen profile to use (e.g., "dev", "prod", "test").'
+      os:
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+        description: 'Operating system to run on (e.g., "ubuntu-latest", "windows-latest", "macos-latest").'
 
 
 jobs:
   test-jvm:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.os }}
 
     steps:
       - name: Checkout
@@ -33,14 +38,18 @@ jobs:
         uses: DeLaGuardo/setup-clojure@13.4
         with:
           lein: latest
+
       - name: Echo Profile
         run: echo "${{ inputs.lein_profile }}"
-      - name: Check reflection 
+
+      - name: Check reflection
         if: ${{ inputs.strict_check == true }}
         run: lein strict-check
+
       - name: Skipping relection check
         if: ${{ inputs.strict_check == false }}
         run: echo "Skipping strict-check"
+
       - name: compile project
         run: |
           if [ -z "${{ inputs.lein_compile_profile }}" ]; then
@@ -48,5 +57,6 @@ jobs:
           else
             lein with-profile ${{ inputs.lein_compile_profile }} compile
           fi
+
       - name: test project
         run: lein test
