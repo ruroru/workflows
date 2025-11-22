@@ -13,6 +13,11 @@ on:
         type: string
         default: ''
         description: 'Optional Leiningen profile to use (e.g., "dev", "prod", "test").'
+      git_tag_version:
+        required: false
+        type: boolean
+        default: true
+        description: 'Set to false to skip stepping the version in README.md.'
 
     secrets:
       GPG_SIGNING_KEY:
@@ -64,6 +69,9 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Stepping project version to prepare it for release
+      - name: Add git tag
+        if: ${{ inputs.git_tag_version == true }}
+        run: lein git-tag
       - name: Deploy to clojars
         env:
           CLOJARS_USER: ${{ secrets.CLOJARS_USER }}
