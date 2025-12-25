@@ -74,6 +74,8 @@ jobs:
           commit_message: Stepping project version to prepare it for release
       - name: Add git tag
         if: ${{ inputs.git_tag_version == true }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: lein git-tag
       - name: Deploy to clojars
         env:
