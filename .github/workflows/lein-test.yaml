@@ -13,6 +13,11 @@ on:
         type: string
         default: ''
         description: 'Optional Leiningen profile to use (e.g., "dev", "prod", "test").'
+      lein_test_profile:
+        required: false
+        type: string
+        default: ''
+        description: 'Optional Leiningen profile to use (e.g., "dev", "prod", "test").'
       os:
         required: false
         type: string
@@ -59,4 +64,9 @@ jobs:
           fi
 
       - name: test project
-        run: lein test
+        run: |
+          if [ -z "${{ inputs.lein_test_profile }}" ]; then
+            lein test
+          else
+            lein with-profile ${{ inputs.lein_test_profile }} test
+          fi
