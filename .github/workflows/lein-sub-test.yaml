@@ -1,0 +1,61 @@
+name: Leiningen test
+
+on:
+  workflow_call:
+    inputs:
+      strict_check:
+        required: false
+        type: boolean
+        default: true
+        description: 'Check for reflection warnings.'
+      os:
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+        description: 'Operating system to run on (e.g., "ubuntu-latest", "windows-latest", "macos-latest").'
+
+
+jobs:
+  test-jvm:
+    runs-on: ${{ inputs.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Prepare java
+        uses: actions/setup-java@v5
+        with:
+          distribution: adopt
+          java-version: 21
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@13.5
+        with:
+          lein: latest
+      - name: Debug - List files
+        run:  pwd; ls -la ;ls -la */project.clj || echo "Subproject files not found!"
+
+      - name: Run lein sub install
+        run: lein sub install
+
+      - name: Run lein install
+        run: lein install
+
+      - name: Check reflection parent project
+        if: ${{ inputs.strict_check == true }}
+        run: lein strict-check
+
+      - name: Check reflection subprojects
+        if: ${{ inputs.strict_check == true }}
+        run: lein sub strict-check
+
+      - name: Skipping reflection check
+        if: ${{ inputs.strict_check == false }}
+        run: echo "Skipping strict-check"
+
+      - name: Run lein sub test
+        run: lein sub test
+
+      - name: Run lein test
+        run: lein test
