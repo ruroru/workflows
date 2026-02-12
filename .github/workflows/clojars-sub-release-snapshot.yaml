@@ -1,0 +1,79 @@
+name: Release Snapshot Version
+
+on:
+  workflow_call:
+    inputs:
+      lein_compile_profile:
+        required: false
+        type: string
+        default: ''
+        description: 'Optional Leiningen profile to use (e.g., "dev", "prod", "test").'
+
+    secrets:
+      GPG_SIGNING_KEY:
+        required: true
+        description: 'GPG signing key for signing artifacts.'
+      CLOJARS_USER:
+        required: true
+        description: 'Clojars username for deployment.'
+      CLOJARS_PASS:
+        required: true
+        description: 'Clojars password/token for deployment.'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Prepare java
+        uses: actions/setup-java@v5
+        with:
+          distribution: adopt
+          java-version: 21
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@13.5
+        with:
+          lein: latest
+
+      - name: Run lein sub install
+        run: lein sub install
+
+      - name: Run lein install
+        run: lein install
+
+      - name: Run sub lein test
+        run: lein sub test
+
+      - name: Run lein test
+        run: lein test
+
+      - name: Check reflection parent project
+        if: ${{ inputs.strict_check == true }}
+        run: lein strict-check
+
+      - name: Check reflection subprojects
+        if: ${{ inputs.strict_check == true }}
+        run: lein sub strict-check
+
+      - name: Skipping reflection check
+        if: ${{ inputs.strict_check == false }}
+        run: echo "Skipping strict-check"
+
+      - name: Configure GPG key
+        env:
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+        run: echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --import >/dev/null 2>/dev/null
+
+      - name: Deploy to clojars
+        env: ${{ secrets }}
+        run: lein sub deploy clojars
+
+      - name: Deploy to clojars
+        env: ${{ secrets }}
+        run: lein deploy clojars
+
