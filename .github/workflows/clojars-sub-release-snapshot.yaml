@@ -11,7 +11,7 @@ on:
 
     secrets:
       GPG_SIGNING_KEY:
-        required: true
+        required: false
         description: 'GPG signing key for signing artifacts.'
       CLOJARS_USER:
         required: true
@@ -25,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -65,15 +67,18 @@ jobs:
         run: echo "Skipping strict-check"
 
       - name: Configure GPG key
-        env:
-          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+        if: env.GPG_SIGNING_KEY != ''
         run: echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --import >/dev/null 2>/dev/null
 
       - name: Deploy to clojars
-        env: ${{ secrets }}
+        env:
+          CLOJARS_USER: ${{ secrets.CLOJARS_USER }}
+          CLOJARS_PASS: ${{ secrets.CLOJARS_PASS }}
         run: lein sub deploy clojars
 
       - name: Deploy to clojars
-        env: ${{ secrets }}
+        env:
+          CLOJARS_USER: ${{ secrets.CLOJARS_USER }}
+          CLOJARS_PASS: ${{ secrets.CLOJARS_PASS }}
         run: lein deploy clojars
 
